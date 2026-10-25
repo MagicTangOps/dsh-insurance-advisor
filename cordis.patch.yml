@@ -1,0 +1,146 @@
+# dsh-insurance-advisor —— 面向个人保险代理人的展业插件包
+#
+# 结构说明：
+#   1) insurance-crm 必须挂在 Host 层：它依赖 Host 的 storageDomain 服务。
+#      挂在 preset 作用域里会一直等待该服务而无法激活（audit 判为 pending）。
+#   2) 其余插件属于 Agent preset，用户选中「保险顾问」时才生效。
+#
+# 安全取向：刻意不挂载 shell 工具（tool-bash / tool-pwsh / terminal），
+# 保留文件读写即可满足展业需要，避免模型在客户资料上执行任意命令。
+
+# ---------- Host 级：客户与保单台账 ----------
+- insert:
+    - id: insurance-crm
+      name: 'dsh-insurance-advisor/crm'
+
+# ---------- Agent preset：保险顾问（个险展业）----------
+- insert:
+    - id: preset-insurance-advisor
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: insurance-advisor
+        name: 保险顾问（个险展业）
+        description: 面向个人保险代理人的展业助手：需求分析、计划书、适当性匹配、双录检查与保全理赔协同。
+        order: 20
+        plugins:
+          # ---------- 人设 ----------
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |
+                你是一位资深保险顾问，服务于个人保险代理人（个险渠道）。
+
+                你的职责边界：
+                - 你辅助代理人完成展业工作，不替代代理人做销售决策。
+                - 涉及监管合规的判定（适当性匹配、销售授权），你必须给出确定性结论
+                  并说明依据，不得以"建议""通常"等模糊表述代替判定。
+                - 任何方案输出都必须附风险提示；分红型、万能型、投连型产品必须明确
+                  说明保单利益的不确定性。
+                - 你不得承诺保证收益，不得建议给予合同外利益。
+
+                展业工作流：需求分析 → 适当性匹配 → 方案设计 → 合规检查 → 交付物。
+                信息不足时使用 ask_user_question 补齐，不要臆测客户情况。
+
+                工具使用约束：
+                - 涉及销售授权、产品分级、客户风险匹配，必须调用
+                  insurance_check_suitability 取得确定性判定，不得自行推断。
+                - 客户档案与保单台账用 insurance_crm_* 工具维护；
+                  登记保单时务必提供回执签收日，犹豫期以该日为准起算。
+                - 准备双录时用 insurance_dual_record_checklist 生成定制清单；
+                  五个必备环节缺一不可。
+                - 涉及监管条款细节时，先用联网搜索核对现行有效版本。
+
+          # ---------- 上下文 ----------
+          - id: agent-instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config:
+              maxBytes: 65536
+          - id: time-context
+            name: '@deepseek-ai/dsh-time-context'
+
+          # ---------- 文件（保留读写，刻意不含 shell） ----------
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config:
+              sampleOverCapGlobResults: false
+
+          # ---------- 联网：检索监管原文与产品条款 ----------
+          - id: tool-web
+            name: '@deepseek-ai/dsh-tool-web'
+            config:
+              fetch: true
+              searchTimeoutMs: 60000
+
+          # ---------- 领域插件：适当性匹配（合规红线） ----------
+          # 判定型逻辑，必须确定性、可审计 —— 固化为插件而非交给模型推断。
+          - id: insurance-suitability
+            name: 'dsh-insurance-advisor/suitability'
+
+          # ---------- 领域插件：双录清单与覆盖校验 ----------
+          - id: insurance-dual-record
+            name: 'dsh-insurance-advisor/dual-record'
+
+          # ---------- 技能：随包分发的 5 个 SKILL.md ----------
+          # 路径从当前 profile 目录推算，避免写死作者机器的绝对路径。
+          - id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+            config:
+              customSkillDirs:
+                - !!js "(ctx.get('profileContext')?.dir ?? process.env.DSH_PROFILE_DIR ?? '') + '/node_modules/dsh-insurance-advisor/skills'"
+          - id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+          - id: skill-office
+            name: '@deepseek-ai/dsh-skill-office'
+
+          # ---------- 交互 ----------
+          - id: tool-ask-user
+            name: '@deepseek-ai/dsh-tool-ask-user'
+          - id: tool-todo
+            name: '@deepseek-ai/dsh-tool-todo'
+            config:
+              allowParallelInProgress: true
+          - id: tool-schedule
+            name: '@deepseek-ai/dsh-tool-schedule'
+          - id: tool-present
+            name: '@deepseek-ai/dsh-tool-present'
+
+          # ---------- 上下文压缩 ----------
+          - id: compaction
+            name: cordis:group
+            group: true
+            isolate:
+              compaction: true
+              toolResultPruner: true
+            config:
+              - id: compaction-basic
+                name: '@deepseek-ai/dsh-compaction-basic'
+              - id: command-compact
+                name: '@deepseek-ai/dsh-command-compact'
+              - id: tool-result-pruner
+                name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+                config:
+                  thresholdChars: 8192
+                  headChars: 4096
+                  tailChars: 1024
+
+          # ---------- 委派：批量客户分析 ----------
+          - id: delegation
+            name: cordis:group
+            group: true
+            isolate:
+              workflowEngine: true
+            config:
+              - id: tool-subagent-control
+                name: '@deepseek-ai/dsh-tool-subagent-control'
+              - id: tool-subagent
+                name: '@deepseek-ai/dsh-tool-subagent'
+                config:
+                  provider: spawn
+                  toolName: subagent
+              - id: tool-subagent-fork
+                name: '@deepseek-ai/dsh-tool-subagent'
+                config:
+                  provider: fork
+                  toolName: subagent_fork
