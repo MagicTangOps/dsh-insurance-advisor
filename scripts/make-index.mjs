@@ -55,7 +55,10 @@ const index = {
       en: 'Sales workflow for individual insurance agents: P1-P5 product class matched against the client risk rating, a policy ledger that counts grace periods from the receipt date, and five-section dual-recording checks. 10 tools and 5 skills.',
       zh: '个险代理人的展业工作流：P1-P5 产品分级与客户风险等级匹配、按回执签收日推算犹豫期的保单台账、双录五环节校验，含 10 个工具与 5 个技能。',
     },
-    icon: `${repository.replace('github.com', 'raw.githubusercontent.com')}/main/assets/icon-180.png`,
+    // jsDelivr rather than raw.githubusercontent: the raw host is unreachable
+    // from mainland China, which is where this plugin's users are, so the tile
+    // would render broken for exactly the audience it targets.
+    icon: `${repository.replace('https://github.com/', 'https://cdn.jsdelivr.net/gh/')}@main/assets/icon-180.png`,
     author: repository.split('/')[3],
     homepage: `${repository}#readme`,
     repository: { url: repository },
