@@ -1,0 +1,66 @@
+{
+  "format": 1,
+  "title": {
+    "en": "MagicTangOps Insurance",
+    "zh": "MagicTangOps 保险插件"
+  },
+  "description": {
+    "en": "Plugins for individual insurance agents published by MagicTangOps.",
+    "zh": "MagicTangOps 发布的个险代理人展业插件。"
+  },
+  "metadata": {
+    "categories": {
+      "insurance": {
+        "title": {
+          "en": "Insurance",
+          "zh": "保险"
+        }
+      }
+    },
+    "labels": {},
+    "sortKeys": {}
+  },
+  "plugins": [
+    {
+      "name": "dsh-insurance-advisor",
+      "title": {
+        "en": "Insurance Advisor",
+        "zh": "保险顾问"
+      },
+      "description": {
+        "en": "Sales workflow for individual insurance agents: P1-P5 product class matched against the client risk rating, a policy ledger that counts grace periods from the receipt date, and five-section dual-recording checks. 10 tools and 5 skills.",
+        "zh": "个险代理人的展业工作流：P1-P5 产品分级与客户风险等级匹配、按回执签收日推算犹豫期的保单台账、双录五环节校验，含 10 个工具与 5 个技能。"
+      },
+      "icon": "https://raw.githubusercontent.com/MagicTangOps/dsh-insurance-advisor/main/assets/icon-180.png",
+      "author": "MagicTangOps",
+      "homepage": "https://github.com/MagicTangOps/dsh-insurance-advisor#readme",
+      "repository": {
+        "url": "https://github.com/MagicTangOps/dsh-insurance-advisor"
+      },
+      "metadata": {
+        "category": "insurance",
+        "keywords": [
+          "insurance",
+          "agent-preset",
+          "compliance",
+          "suitability"
+        ],
+        "labels": []
+      },
+      "versions": [
+        {
+          "version": "0.1.0",
+          "publishTimestamp": 1793033720,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/MagicTangOps/dsh-insurance-advisor",
+            "commit": "95b1e4167fbdfefba2722359bef49b5523415b9c"
+          },
+          "engines": {
+            "dsh": ">=0.2.1-rc.1 <0.3.0-0"
+          }
+        }
+      ]
+    }
+  ]
+}
