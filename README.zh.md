@@ -9,12 +9,22 @@
 ## 安装
 
 ```sh
-dsh plugin --profile <profile> add github:MagicTangOps/dsh-insurance-advisor
+dsh plugin --profile <profile> add dsh-insurance-advisor
 ```
 
 重启后打开 **设置 → Agent presets**，选择「保险顾问（个险展业）」。
 
-包内声明了 `dsh.bundle`，`dsh plugin add` 会把它作为 profile 层合并。发布到 npm 后也可以按 `dsh-insurance-advisor` 安装。
+包内声明了 `dsh.bundle`，`dsh plugin add` 会把它作为 profile 层合并。如果想直接跟随 `main`，也可从仓库安装：
+
+```sh
+dsh plugin --profile <profile> add github:MagicTangOps/dsh-insurance-advisor
+```
+
+本仓库同时是一个 DSH 插件市场索引源 —— 在 **插件 → 发现 → 添加索引源** 里加入下面的 URL，就能在 Harness 内直接浏览安装：
+
+```
+https://cdn.jsdelivr.net/gh/MagicTangOps/dsh-insurance-advisor@main/index.json
+```
 
 ## 包含什么
 
