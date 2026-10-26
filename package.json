@@ -1,7 +1,7 @@
 {
   "name": "dsh-insurance-advisor",
   "version": "0.1.0",
-  "description": "Insurance advisor agent preset for individual agents: suitability matching, policy ledger, and sales-recording checks.",
+  "description": "Sales workflow for individual insurance agents: P1-P5 suitability matching, a policy ledger counting grace periods from the receipt date, and five-section dual-recording checks.",
   "type": "module",
   "license": "MIT",
   "keywords": [
@@ -43,7 +43,12 @@
     "LICENSE"
   ],
   "scripts": {
-    "test": "node test/rules.test.mjs && node test/dates.test.mjs && node test/domain.test.mjs && node test/checklist.test.mjs"
+    "test": "node test/rules.test.mjs && node test/dates.test.mjs && node test/domain.test.mjs && node test/checklist.test.mjs",
+    "prepublishOnly": "npm test"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "peerDependencies": {
     "@deepseek-ai/dsh-storage-domain": ">=0.0.1-rc.1 <0.3.0-0 || >=0.2.1-rc.1 <0.3.0-0",
