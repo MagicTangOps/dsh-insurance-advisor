@@ -44,7 +44,10 @@
   ],
   "scripts": {
     "test": "node test/rules.test.mjs && node test/dates.test.mjs && node test/domain.test.mjs && node test/checklist.test.mjs",
-    "prepublishOnly": "npm test"
+    "prepublishOnly": "npm test",
+    "index": "node scripts/make-index.mjs",
+    "release": "node scripts/release.mjs",
+    "purge": "node scripts/purge-cdn.mjs"
   },
   "publishConfig": {
     "access": "public",
